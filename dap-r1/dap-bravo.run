@@ -1,0 +1,29 @@
+print( "OAS example");
+
+print( "------------------ reading model ...");
+model "./dap-bravo.mod";
+
+
+print( "------------------ reading data ...");
+#data "./dap-net3.dat";
+data "./dap-net4.dat";
+#data "./dap-net12.dat";
+
+
+print( "------------------ solving ...");
+option solver "cplex";
+solve;
+
+
+print( "------------------ objective:");
+display z;
+
+
+print( "------------------ decision variables:");
+display demandPath_flow;
+
+
+display link_load, link_capacity;
+
+
+

@@ -1,0 +1,31 @@
+print( "OAS example");
+
+print( "------------------ reading model ...");
+model "./ddap.mod";
+
+
+print( "------------------ reading data ...");
+#data "./ddap-net3.dat";
+#data "./ddap-net3a.dat";
+data "./dap-net4.dat"
+#data "./ddap-net4.dat";
+#data "./ddap-net12.dat";
+
+
+print( "------------------ solving ...");
+option solver "cplex";
+solve;
+
+
+print( "------------------ objective:");
+display capacityCost;
+
+
+print( "------------------ decision variables:");
+display demandPath_flow;
+
+
+display link_load, link_capacity, link_moduleCount;
+
+
+
