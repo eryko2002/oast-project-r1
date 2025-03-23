@@ -1,6 +1,5 @@
 import numpy as np
 import json
-from input_data_ea import *
 
 
 def roulette_wheel_selection(population, probabilities):
@@ -20,27 +19,6 @@ def roulette_wheel_selection(population, probabilities):
             return i, population[i]  # Zwracamy indeks (numer) i chromosom
 
 
-# Funkcja celu
-def calculate_z(chromosome):
-    link_load = {link: 0 for link in linkModuleCount}  # Inicjalizowanie obciążenia linków
-    z = 0  # Zmienna celu, maksymalne przeciążenie
-
-    # Przechodzimy przez każdy wiersz w chromosomie (każde żądanie)
-    for d in range(chromosome.shape[0]):
-        # Przechodzimy przez każdą ścieżkę dla danego żądania
-        for p in range(chromosome.shape[1]):
-            path_id = chromosome[d, p]  # ID ścieżki dla danego żądania
-            if path_id > 0 and path_id <= len(demand_paths[d + 1]):
-                # Sumujemy obciążenie linków
-                for link in demand_paths[d + 1][path_id - 1]:
-                    link_load[link] += demand_volume[d + 1]
-
-    # Sprawdzamy przeciążenie linków
-    for link, load in link_load.items():
-        if load > linkModuleCount[link]:
-            z = max(z, load - linkModuleCount[link])  # Ustalamy maksymalne przeciążenie
-    
-    return z
 
 #Wczytujemy dane wejściowe dla sieci 4 węzłowej
 linkModuleCount,demand_paths,demand_volume=read_json()[0],read_json()[1],read_json()[2]

@@ -19,6 +19,16 @@ demand_paths = {
     "6": [[5], [3, 4], [1, 2, 4]]
 }
 
+# Maksymalna liczba ścieżek możliwa do wykorzystania dla danego żądania d
+demand_maxPath = {
+    "1": 3,
+    "2": 3,
+    "3": 2,
+    "4": 3,
+    "5": 3,
+    "6": 3
+}
+
 # Tworzenie demand_volume
 demand_volume = {
     "1": 23,
@@ -32,19 +42,23 @@ demand_volume = {
 base_path=f'{os.path.join(os.getcwd(),"input_net4")}'
 
 # Zapis linkModuleCount do CSV
-link_module_df = pd.DataFrame(list(linkModuleCount.items()), columns=["Link", "Module Count"])
-link_module_df.to_csv(f'{base_path}/link_module_count.csv', index=False)
+link_module_df = pd.DataFrame(list(linkModuleCount.items()), columns=["Link", "ModuleCount"])
+link_module_df.to_csv(f'{base_path}/link_moduleCount.csv', index=False)
 
 # Zapis demand_paths do CSV
-demand_paths_data = []
+demand_path_links_data = []
 
 
 for demand, paths in demand_paths.items():
     for i, path in enumerate(paths):
-        demand_paths_data.append({"Demand": demand, "Path Level": i+1, "Paths": path})
+        demand_path_links_data.append({"Demand": demand, "Path": i+1, "Paths": path})
 
-demand_paths_df = pd.DataFrame(demand_paths_data)
-demand_paths_df.to_csv(f'{base_path}/demand_paths.csv', index=False)
+demand_paths_df = pd.DataFrame(demand_path_links_data)
+demand_paths_df.to_csv(f'{base_path}/DemandPath_links.csv', index=False)
+
+# Zapis demand_maxPath do CSV
+demand_maxPath_df = pd.DataFrame(list(demand_maxPath.items()), columns=["Demand", "MaxPath"])
+demand_maxPath_df.to_csv(f'{base_path}/demand_maxPath.csv', index=False)
 
 # Zapis demand_volume do CSV
 demand_volume_df = pd.DataFrame(list(demand_volume.items()), columns=["Demand", "Volume"])
