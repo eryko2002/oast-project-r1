@@ -1,12 +1,13 @@
 import pandas as pd
 import os
-# Tworzenie linkModuleCount
-linkModuleCount = {
-    "1": 8,
-    "2": 4,
-    "3": 6,
-    "4": 8,
-    "5": 0
+
+# Tworzenie link_capacity
+link_capacity = {
+    1: 16,
+    2: 8,
+    3: 12,
+    4: 16,
+    5: 0
 }
 
 # Tworzenie demand_paths
@@ -39,29 +40,31 @@ demand_volume = {
     "6": 17
 }
 
-base_path=f'{os.path.join(os.getcwd(),"input_net4")}'
+base_path = f'{os.path.join(os.getcwd(), "input_net4")}'
 
-# Zapis linkModuleCount do CSV
-link_module_df = pd.DataFrame(list(linkModuleCount.items()), columns=["Link", "ModuleCount"])
-link_module_df.to_csv(f'{base_path}/link_moduleCount.csv', index=False)
+# Zapis link_capacity do CSV
+link_capacity_df = pd.DataFrame(list(link_capacity.items()), columns=["Link", "LinkCapacity"])
+link_capacity_df.to_csv(f'{base_path}/LinkCapacity.csv', index=False)
 
 # Zapis demand_paths do CSV
 demand_path_links_data = []
 
-
 for demand, paths in demand_paths.items():
     for i, path in enumerate(paths):
-        demand_path_links_data.append({"Demand": demand, "Path": i+1, "Paths": path})
+        demand_path_links_data.append({"Demand": demand, "Path": i + 1, "Paths": path})
 
 demand_paths_df = pd.DataFrame(demand_path_links_data)
 demand_paths_df.to_csv(f'{base_path}/DemandPath_links.csv', index=False)
 
-# Zapis demand_maxPath do CSV
-demand_maxPath_df = pd.DataFrame(list(demand_maxPath.items()), columns=["Demand", "MaxPath"])
-demand_maxPath_df.to_csv(f'{base_path}/demand_maxPath.csv', index=False)
+# Połączenie demand_maxPath i demand_volume w jeden DataFrame
+combined_data = {
+    "Demand": list(demand_maxPath.keys()),
+    "MaxPath": list(demand_maxPath.values()),
+    "Volume": list(demand_volume.values())
+}
 
-# Zapis demand_volume do CSV
-demand_volume_df = pd.DataFrame(list(demand_volume.items()), columns=["Demand", "Volume"])
-demand_volume_df.to_csv(f'{base_path}/demand_volume.csv', index=False)
+# Tworzenie DataFrame i zapis do CSV
+combined_df = pd.DataFrame(combined_data)
+combined_df.to_csv(f'{base_path}/Demand_MaxPath_Volume.csv', index=False)
 
 print("Dane zapisano do plików CSV.")

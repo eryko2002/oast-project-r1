@@ -17,7 +17,7 @@ max_paths = 3         # Maksymalna liczba ścieżek (wierszy)
 
 
 def read_demand_volume():
-    df = pd.read_csv(f'{base_path}/demand_volume.csv')
+    df = pd.read_csv(f'{base_path}/Demand_MaxPath_Volume.csv')
     # Konwersja danych na słownik
     demand_volume = pd.Series(df.Volume.values, index=df.Demand).to_dict() 
     return demand_volume 
@@ -39,7 +39,7 @@ def generate_chromosome(demand_volume, num_demands, max_paths):
         # Pozostała wartość trafia do ostatniej komórki w kolumnie
         chromosome[max_paths - 1, demand_idx - 1] = remaining_value
 
-    return chromosome
+    return np.array(chromosome).T
 
 def generate_population(num_chromosomes, demand_volume, num_demands, max_paths):
     population = []
@@ -51,12 +51,18 @@ def generate_population(num_chromosomes, demand_volume, num_demands, max_paths):
     
     return population
 
+def save_population_to_json(population, filename="chromosomes.json"):
+    # Create a dictionary with keys as "Chromosome <nr>"
+    population_dict = {
+        f"Chromosome {i+1}": chromosome.tolist() 
+        for i, chromosome in enumerate(population)
+    }
+    
+    # Save the dictionary to a JSON file
+    with open(f'{base_path}/{filename}', 'w') as json_file:
+        json.dump(population_dict, json_file, indent=4)
 
 # Generowanie populacji
 population = generate_population(10, demand_volume, num_demands=6, max_paths=3)
 
-# Wyświetlenie wyników
-for idx, chromosom in enumerate(population):
-    print(f"Chromosom {idx + 1}:")
-    print(chromosom)
-    print()
+save_population_to_json(population)
