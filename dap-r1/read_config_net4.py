@@ -17,7 +17,7 @@ def load_chromosomes_from_json(file_path):
     Kluczem jest "Chromosome <nr>", a wartością jest macierz.
 
     :param file_path: Ścieżka do pliku JSON
-    :return: Słownik, gdzie kluczem jest "Chromosome <nr>", a wartością macierz (lista list)
+    :return: Słownik, gdzie kluczem jest "Chromosome <nr>", a wartością macierz (tabela przepływów))
     """
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -85,18 +85,6 @@ def load_flow_data():
         [20.5, 2.5, 0],
         [17, 0, 0]
     ])
-
-def print_chromosomes_data(chromosomes_data):
-    """
-    Funkcja wyświetla dane chromosomów.
-    
-    :param chromosomes_data: Słownik z danymi chromosomów
-    """
-    for chrom, matrix in chromosomes_data.items():
-        print(f"{chrom}:")
-        for row in matrix:
-            print(row)
-        print("\n")
 
 chromosomes_data = load_chromosomes_from_json(chromosomes_matrix_path)
 demand_path_links = load_demand_path_links(demand_path_links_csv)
