@@ -3,3 +3,12 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 #deactivate
+
+#1.Configure input data in JSON: link_capacity,demand_maxPath,demand_volume
+python3 config-net4.py
+#2. Generate population consisting of 10 candidates - every candidate owns randomly generated flow table matrix
+python3 generate_population.py
+#3. Run EA
+python3 dap-ea.py
+
+
