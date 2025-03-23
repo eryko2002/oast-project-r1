@@ -1,8 +1,8 @@
 import numpy as np
 import json
 from read_config_net4 import *
-from generate_population import num_chromosomes
 
+num_chromosomes = 10
 # Funkcja do obliczania wartości celu
 def calculate_objective_value(demandPath_flow, demand_max_path, demand_volume, demand_path_links, link_capacity):
     # Inicjalizacja zmiennych
