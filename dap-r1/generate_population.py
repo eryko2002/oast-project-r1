@@ -1,5 +1,4 @@
 import numpy as np
-import random as rd
 import csv
 import json
 
@@ -11,45 +10,63 @@ max_paths = 3         # Maksymalna liczba ścieżek (wierszy)
 # Inicjalizacja pustej listy do przechowywania chromosomów
 population = []
 
+# Przykładowe wartości z demand_volume
+demand_volume = {
+    "1": 23,
+    "2": 24,
+    "3": 15,
+    "4": 2,
+    "5": 23,
+    "6": 17
+}
+
+# Inicjalizacja pustej listy do przechowywania chromosomów
+population = []
+
+# Funkcja generująca chromosom, w którym suma wartości w każdej kolumnie odpowiada demand_volume
+def generate_chromosome():
+    chromosom = np.zeros((max_paths, num_demands), dtype=int)
+
+    for col in range(num_demands):
+        target_sum = demand_volume[str(col + 1)]  # docelowa suma dla tej kolumny
+
+        # Generujemy losowe wartości dla tej kolumny, tak by ich suma wynosiła target_sum
+        while True:
+            # Losujemy liczby, które będą sumować się do target_sum
+            random_values = np.random.randint(0, target_sum + 1, size=max_paths)
+            if random_values.sum() == target_sum:
+                chromosom[:, col] = random_values
+                break
+    
+    return chromosom
+
 # Generowanie losowej populacji
 for _ in range(num_chromosomes):
-    # Tworzymy losową macierz o wymiarach (num_demands, max_paths)
-    chromosom = np.random.randint(0, 5, size=(max_paths, num_demands))  # wartości przepływów między 0 a 4
-    population.append(chromosom.tolist())  # Zamienia macierz na listę, aby zapisać w CSV
+    chromosom = generate_chromosome()
+    population.append(chromosom.tolist())
 
-# Generowanie listy losowych prawdopodobieństw (np. z przedziału [0, 1])
-random_probs = np.random.rand(num_chromosomes)
-
-# Normalizacja prawdopodobieństw, aby ich suma wynosiła 1
-normalized_probs = (random_probs / random_probs.sum()) * 100
-
-# Przygotowanie danych do zapisania w CSV
-with open('chromosomes.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    
-    # Nagłówki kolumn
-    writer.writerow([f'Path {i+1}' for i in range(num_demands)] + ['Probability'])
-    
-    # Zapisanie chromosomów i prawdopodobieństw
+def saveFlowTableToJSON():
+    data = {}
     for i, chromosom in enumerate(population, start=1):
-        probability = normalized_probs[i-1]  # Pobranie prawdopodobieństwa dla danego chromosomu
-        for row in chromosom:
-            writer.writerow(row + [round(probability, 4)])
+        # Zapisujemy tablicę chromosomów bez łączenia wierszy w ciąg tekstowy
+        data[f"Chromosome {i}"] = chromosom
+    
+    with open('chromosomes.json', 'w') as json_file:
+        json.dump(data, json_file, indent=4)
 
-print("Dane zostały zapisane do pliku 'chromosomes.csv'")
+    print("Dane zostały zapisane do pliku 'chromosomes.json'")
 
-# Przygotowanie danych do zapisania w JSON
-data = {}
 
-for i, chromosom in enumerate(population, start=1):
-    chromosom_data = {
-        "Matrix": chromosom,
-        "Probability": round(normalized_probs[i-1], 4)
-    }
-    data[f"Chromosome {i}"] = chromosom_data
+# Test zapisu
+#saveFlowTableToCSV()
+saveFlowTableToJSON()
 
-# Zapisanie danych do pliku JSON
-with open('chromosomes.json', 'w') as json_file:
-    json.dump(data, json_file, indent=4)
+# Wypisanie populacji
+for i, chromosom in enumerate(population, 1):
+    print(f"Chromosom {i}:")
+    print(np.array(chromosom))  # Używamy numpy array do lepszego formatowania
 
-print("Dane zostały zapisane do pliku 'chromosomes.json'")
+#for i, arr in enumerate(population,start=1):
+#    formatted_chromosome = '\n'.join(str(row) for row in arr)
+#    print(f'Chromosom{i}:\n[{formatted_chromosome}]')
+#

@@ -26,47 +26,6 @@ def read_json():
     return linkModuleCount, demand_paths, demand_volume
 
 
-def allocate_DemandPathFlow_from_csv():
-    # Odczyt danych z pliku CSV
-    with open('chromosomes.csv', 'r') as f:
-        reader = csv.reader(f)
-        headers = next(reader)  # Pomijamy nagłówki
-        
-        # Odczytanie danych
-        current_chromosom = []
-        for row in reader:
-            # Odczytanie chromosomów (ścieżki)
-            paths = list(map(int, row[:-1]))  # Wszystkie kolumny oprócz ostatniej (prawdopodobieństwo)
-            
-            # Odczytanie prawdopodobieństwa
-            probability = float(row[-1])  # Ostatnia kolumna to prawdopodobieństwo
-            
-            # Dodanie chromosomu i prawdopodobieństwa
-            current_chromosom.append(np.array(paths))  # Dodajemy jako numpy array
-            
-            # Sprawdzamy, czy chromosom jest pełny
-            if len(current_chromosom) == 3:  # Zmienna max_paths
-                population.append(np.array(current_chromosom))
-                probabilities.append(probability)
-                current_chromosom = []  # Resetujemy do następnego chromosomu
-
-def allocate_DemandPathFlow_from_json():
-    # Odczyt danych z pliku JSON
-    with open('chromosomes.json', 'r') as f:
-        data = json.load(f)
-    
-    # Przetwarzanie danych z JSON
-    for chromosome, details in data.items():
-        # Odczytanie macierzy (ścieżek) chromosomu
-        paths = np.array(details["Matrix"])  # Przekształcenie listy w numpy array
-        
-        # Odczytanie prawdopodobieństwa
-        probability = details["Probability"]
-        
-        # Dodanie chromosomu do populacji
-        population.append(paths)
-        probabilities.append(probability)
-
 # Wyświetlanie odczytanych danych
 def print_population():
     for i, (chromosom, probability) in enumerate(zip(population, probabilities), start=1):
