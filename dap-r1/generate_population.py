@@ -6,6 +6,7 @@ import os
 import random
 
 base_path=f'{os.path.join(os.getcwd(),"input_net4")}'
+demand_max_path_csv = os.path.join(base_path, "Demand_MaxPath_Volume.csv")
 
 demand_volume=dict()
 population = list()
@@ -14,10 +15,8 @@ num_chromosomes = 10  # Liczba chromosomów w populacji
 num_demands = 6       # Liczba żądań (kolumn)
 max_paths = 3         # Maksymalna liczba ścieżek (wierszy)
 
-
-
 def read_demand_volume():
-    df = pd.read_csv(f'{base_path}/Demand_MaxPath_Volume.csv')
+    df = pd.read_csv(f'{demand_max_path_csv}')
     # Konwersja danych na słownik
     demand_volume = pd.Series(df.Volume.values, index=df.Demand).to_dict() 
     return demand_volume 
@@ -58,11 +57,12 @@ def save_population_to_json(population, filename="chromosomes.json"):
         for i, chromosome in enumerate(population)
     }
     
-    # Save the dictionary to a JSON file
     with open(f'{base_path}/{filename}', 'w') as json_file:
         json.dump(population_dict, json_file, indent=4)
 
-# Generowanie populacji
-population = generate_population(10, demand_volume, num_demands=6, max_paths=3)
 
+# Generowanie populacji
+population = generate_population(num_chromosomes=num_chromosomes, demand_volume=demand_volume, num_demands=num_demands, max_paths=max_paths)
+
+# Zapis tablicy przepływów każdego chromosomu do pliku JSON
 save_population_to_json(population)

@@ -1,7 +1,10 @@
 import pandas as pd
 import os
 
-# Tworzenie link_capacity
+
+base_path = f'{os.path.join(os.getcwd(), "input_net4")}'
+
+# Tworzenie link_capacity: e : C_e
 link_capacity = {
     1: 16,
     2: 8,
@@ -10,7 +13,7 @@ link_capacity = {
     5: 0
 }
 
-# Tworzenie demand_paths
+# Tworzenie demand_paths: d : [P[d,p] : {e1,e2,e3...}]
 demand_paths = {
     "1": [[1], [2, 3], [2, 4, 5]],
     "2": [[2], [1, 3], [1, 4, 5]],
@@ -20,7 +23,7 @@ demand_paths = {
     "6": [[5], [3, 4], [1, 2, 4]]
 }
 
-# Maksymalna liczba ścieżek możliwa do wykorzystania dla danego żądania d
+# Maksymalna liczba ścieżek możliwa do wykorzystania dla danego żądania d : P
 demand_maxPath = {
     "1": 3,
     "2": 3,
@@ -30,7 +33,7 @@ demand_maxPath = {
     "6": 3
 }
 
-# Tworzenie demand_volume
+# Tworzenie demand_volume: d : h_d
 demand_volume = {
     "1": 23,
     "2": 24,
@@ -40,7 +43,6 @@ demand_volume = {
     "6": 17
 }
 
-base_path = f'{os.path.join(os.getcwd(), "input_net4")}'
 
 # Zapis link_capacity do CSV
 link_capacity_df = pd.DataFrame(list(link_capacity.items()), columns=["Link", "LinkCapacity"])

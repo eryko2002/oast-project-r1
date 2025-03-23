@@ -103,29 +103,3 @@ demand_path_links = load_demand_path_links(demand_path_links_csv)
 link_capacity = load_link_capacity(link_capacity_csv)
 demand_max_path, demand_volume = load_demand_max_path_volume(demand_max_path_csv)
 demandPath_flow = load_flow_data()
-
-# Główna logika wczytywania danych
-def main():
-    # Wczytywanie danych
-    chromosomes_data = load_chromosomes_from_json(chromosomes_matrix_path)
-    demand_path_links = load_demand_path_links(demand_path_links_csv)
-    link_capacity = load_link_capacity(link_capacity_csv)
-    demand_max_path, demand_volume = load_demand_max_path_volume(demand_max_path_csv)
-    demandPath_flow = load_flow_data()
-
-    # Wyświetlanie danych chromosomów
-    print_chromosomes_data(chromosomes_data)
-
-    # Przykładowe wyświetlanie innych danych (jeśli potrzeba):
-    #print("DemandPath_links:")
-    #for demand, paths in demand_path_links.items():
-    #    for path_id, path in enumerate(paths, 1):
-    #        print(f"P({demand},{path_id}): {path}")
-
-    #print("Link Capacities:", link_capacity)
-    #print("Demand MaxPath:", demand_max_path)
-    #print("Demand Volume:", demand_volume)
-    #print("Demand Path Flow:\n", demandPath_flow)
-#
-if __name__ == "__main__":
-    main()

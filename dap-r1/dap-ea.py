@@ -54,6 +54,8 @@ def main_candidate(candidate_number):
     print(f'Flow table for Chromosom {candidate_number}:\n{demandPath_flow.T}')
 
 if __name__=="__main__":
+    main_model()
+    print()
     for candidate_number in range(num_chromosomes):
         print('========================================================')
         main_candidate(candidate_number=candidate_number+1)
