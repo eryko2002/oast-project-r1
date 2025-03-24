@@ -6,12 +6,35 @@ N = 10
 K=1
 
 
-def fix_column_sum(flow_table, col_idx, target_sum):
-    current_sum = np.sum(flow_table[:, col_idx])
-    if current_sum != target_sum:
-        # Skalowanie proporcjonalne wartości w kolumnie do celu (target_sum)
-        flow_table[:, col_idx] = flow_table[:, col_idx] * (target_sum / current_sum)
-        flow_table[:, col_idx] = np.round(flow_table[:, col_idx])  # Zaokrąglamy do liczb całkowitych
+def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
+    num_rows = flow_table.shape[0]
+    demand_volume_h_d = demand_volume[col_idx + 1]
+    mutated_sum_h_d = np.sum(flow_table[:, col_idx])
+    delta = int(mutated_sum_h_d - demand_volume_h_d)
+    #print(f"Delta: {delta}")
+
+    while delta!=0:
+        # Indeksy komórek w danej kolumnie poza indeksem komórki która była mutowana
+        indices = np.delete(np.arange(flow_table.shape[0]), row_idx)
+        np.random.shuffle(indices)
+
+        for idx in indices:
+            if delta > 0:
+                # Zmniejszamy wartość w komórce, jeśli delta jest dodatnia
+                allocate_delta = np.random.randint(1, delta + 1) 
+                flow_table[idx, col_idx] -= allocate_delta
+                delta -= allocate_delta
+                #print(f"Delta: {delta}")
+            elif delta < 0:
+                # Zwiększamy wartość w komórce, jeśli delta jest ujemna
+                allocate_delta = np.random.randint(1, abs(delta) + 1) 
+                flow_table[idx, col_idx] += allocate_delta
+                delta += allocate_delta
+                #print(f"Delta: {delta}")
+
+    return flow_table
+
+
 
 # Funkcja do obliczania wartości celu
 def calculate_objective_value(demandPath_flow, demand_max_path, demand_volume, demand_path_links, link_capacity):
@@ -111,11 +134,14 @@ def mutate(flow_table,demand_volume):
     
     # Modyfikacja wartości (np. zmiana o losową wartość w zakresie [-2, 2])
     flow_table[row_idx, col_idx] = np.random.randint(0, demand_volume[col_idx+1])
-    print(flow_table)
     # Poprawiamy sumę kolumny, aby zgadzała się z zapotrzebowaniem
-    fix_column_sum(flow_table, col_idx, demand_volume[col_idx+1])
-    
-    return flow_table
+    #fix_column_sum(flow_table, col_idx, demand_volume[col_idx+1])
+    pre_flow_table = flow_table
+    #print("Mutated, before fix function:\n{}".format(pre_flow_table))
+    post_flow_table=fix_column_sum(pre_flow_table, row_idx, col_idx, demand_volume)
+    #print()
+    #print("Mutated, after fix function:\n{}".format(post_flow_table))
+    return post_flow_table
 
 def main_model():
     #obliczamy wartość funkcji celu dla wzorca:
@@ -153,9 +179,14 @@ if __name__=="__main__":
     print(offspring2)
 
     print("===========================MUTATION=====================================")
-    mutate(offspring1,demand_volume)
+    print("Mutated Offspring 1:")
+    offspring1=mutate(offspring1,demand_volume)
+    print(offspring1)
     print()
-    mutate(offspring2,demand_volume)
+    print("Mutated Offspring 2:")
+    offspring2=mutate(offspring2,demand_volume)
+    print(offspring2)
     print()
+
     print(demand_volume)
 
