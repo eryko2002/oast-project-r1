@@ -15,7 +15,7 @@ def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
 
     while delta!=0:
         # Indeksy komórek w danej kolumnie poza indeksem komórki która była mutowana
-        indices = np.delete(np.arange(flow_table.shape[0]), row_idx)
+        indices = np.delete(np.arange(num_rows), row_idx)
         np.random.shuffle(indices)
 
         for idx in indices:
