@@ -11,26 +11,37 @@ def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
     demand_volume_h_d = demand_volume[col_idx + 1]
     mutated_sum_h_d = np.sum(flow_table[:, col_idx])
     delta = int(mutated_sum_h_d - demand_volume_h_d)
-    #print(f"Delta: {delta}")
-
+    print(f"Starting Delta: {delta}")
+    iteration=0
     while delta!=0:
         # Indeksy komórek w danej kolumnie poza indeksem komórki która była mutowana
         indices = np.delete(np.arange(num_rows), row_idx)
         np.random.shuffle(indices)
 
         for idx in indices:
-            if delta > 0:
+            iteration+=1
+            if delta > 0 and flow_table[idx, col_idx]>0:
                 # Zmniejszamy wartość w komórce, jeśli delta jest dodatnia
-                allocate_delta = np.random.randint(1, delta + 1) 
-                flow_table[idx, col_idx] -= allocate_delta
-                delta -= allocate_delta
-                #print(f"Delta: {delta}")
-            elif delta < 0:
+                allocate_delta = np.random.randint(1, delta + 1)
+                if flow_table[idx, col_idx]-allocate_delta>=0: 
+                    flow_table[idx, col_idx] -= allocate_delta 
+                    delta -= allocate_delta
+                    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+                    print(f'Iteration number: {iteration}')
+                    print(f"Current Delta: {delta}")
+                    print("Current Flow_table \n{}".format(flow_table))
+                    print()
+            elif delta < 0 and flow_table[idx, col_idx]>0:
                 # Zwiększamy wartość w komórce, jeśli delta jest ujemna
-                allocate_delta = np.random.randint(1, abs(delta) + 1) 
-                flow_table[idx, col_idx] += allocate_delta
-                delta += allocate_delta
-                #print(f"Delta: {delta}")
+                allocate_delta = np.random.randint(1, abs(delta) + 1)
+                if flow_table[idx, col_idx]-allocate_delta>=0:
+                    flow_table[idx, col_idx] += allocate_delta
+                    delta += allocate_delta
+                    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+                    print(f'Iteration number: {iteration}')
+                    print(f"Current Delta: {delta}")
+                    print("Current Flow_table \n{}".format(flow_table))
+                    print()
 
     return flow_table
 
@@ -137,7 +148,7 @@ def mutate(flow_table,demand_volume):
     # Poprawiamy sumę kolumny, aby zgadzała się z zapotrzebowaniem
     #fix_column_sum(flow_table, col_idx, demand_volume[col_idx+1])
     pre_flow_table = flow_table
-    #print("Mutated, before fix function:\n{}".format(pre_flow_table))
+    print("Mutated, before fix function:\n{}".format(pre_flow_table))
     post_flow_table=fix_column_sum(pre_flow_table, row_idx, col_idx, demand_volume)
     #print()
     #print("Mutated, after fix function:\n{}".format(post_flow_table))
@@ -179,14 +190,11 @@ if __name__=="__main__":
     print(offspring2)
 
     print("===========================MUTATION=====================================")
-    print("Mutated Offspring 1:")
-    offspring1=mutate(offspring1,demand_volume)
-    print(offspring1)
+    #print("Mutated Offspring 1:")
+    #mutate(offspring1,demand_volume)
     print()
     print("Mutated Offspring 2:")
-    offspring2=mutate(offspring2,demand_volume)
-    print(offspring2)
+    mutate(offspring2,demand_volume)
     print()
-
     print(demand_volume)
 
