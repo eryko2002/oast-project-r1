@@ -5,6 +5,14 @@ from read_config_net4 import *
 N = 10
 K=1
 
+
+def fix_column_sum(flow_table, col_idx, target_sum):
+    current_sum = np.sum(flow_table[:, col_idx])
+    if current_sum != target_sum:
+        # Skalowanie proporcjonalne wartości w kolumnie do celu (target_sum)
+        flow_table[:, col_idx] = flow_table[:, col_idx] * (target_sum / current_sum)
+        flow_table[:, col_idx] = np.round(flow_table[:, col_idx])  # Zaokrąglamy do liczb całkowitych
+
 # Funkcja do obliczania wartości celu
 def calculate_objective_value(demandPath_flow, demand_max_path, demand_volume, demand_path_links, link_capacity):
     # Inicjalizacja zmiennych
@@ -67,24 +75,47 @@ def roulette_wheel_selection_algorithm():
     
     return parent1,parent2
 
+def crossover(parent1, parent2):
+    num_columns = parent1.shape[1]
+    
+    # Wybieramy losowe kolumny do zamiany (np. 2 kolumny)
+    #num_cols_to_swap = np.random.randint(1, num_columns)  # Można ustawić stałą liczbę kolumn
+    num_cols_to_swap = 1
+    cols_to_swap = np.random.choice(num_columns, num_cols_to_swap, replace=False)
+    
+    offspring1 = np.copy(parent1)
+    offspring2 = np.copy(parent2)
 
-def crossover(parent1,parent2):
-    crossover_point=np.random.randint(1,parent1.shape[1])
-    offspring1=np.copy(parent1)
-    offspring2=np.copy(parent2)
-    offspring1[:,crossover_point:]=parent1[:,crossover_point:]
-    offspring2[:,crossover_point:]=parent2[:,crossover_point:]
+    # Zamiana wybranych kolumn
+    for col in cols_to_swap:
+        offspring1[:, col] = parent2[:, col]
+        offspring2[:, col] = parent1[:, col]
 
-    # Zaznaczenie wartościami ujemnymi komórek rodziców, które są wykorzystywane w operacji krzyżowania
+    # Zaznaczenie ujemnymi wartościami zmienionych kolumn w rodzicach
     marked_parent1 = np.copy(parent1)
     marked_parent2 = np.copy(parent2)
+    marked_parent1[:, cols_to_swap] = -1
+    marked_parent2[:, cols_to_swap] = -1
     
-    # Oznaczenie zmienionych komórek dla rodzica 1 (które zmieniają się na podstawie rodzica 2)
-    marked_parent1[:, crossover_point:] = -1  # Zmienione komórki w rodzicu 1
-    # Oznaczenie zmienionych komórek dla rodzica 2 (które zmieniają się na podstawie rodzica 1)
-    marked_parent2[:, crossover_point:] = -1  # Zmienione komórki w rodzicu 2
+    return offspring1,offspring2,parent1,parent2,marked_parent1,marked_parent2
+
+def mutate(flow_table,demand_volume):
+    num_columns = flow_table.shape[1]
+    num_rows = flow_table.shape[0]
     
-    return (offspring1, offspring2), (parent1,parent2),(marked_parent1, marked_parent2)
+    # Wybieramy losową kolumnę do mutacji
+    col_idx = np.random.randint(0, num_columns)
+    
+    # Wybieramy losową komórkę w kolumnie do zmiany
+    row_idx = np.random.randint(0, num_rows)
+    
+    # Modyfikacja wartości (np. zmiana o losową wartość w zakresie [-2, 2])
+    flow_table[row_idx, col_idx] = np.random.randint(0, demand_volume[col_idx+1])
+    print(flow_table)
+    # Poprawiamy sumę kolumny, aby zgadzała się z zapotrzebowaniem
+    fix_column_sum(flow_table, col_idx, demand_volume[col_idx+1])
+    
+    return flow_table
 
 def main_model():
     #obliczamy wartość funkcji celu dla wzorca:
@@ -108,17 +139,23 @@ if __name__=="__main__":
     print("===========================SELECTION=====================================")
     parent1,parent2=roulette_wheel_selection_algorithm()
     print("===========================CROSSOVER=====================================")
-    offspring,parents,marked_parents=crossover(parent1=parent1,parent2=parent2)
-
+    offspring1,offspring2,parent1,parent2,marked_parent1,marked_parent2=crossover(parent1=parent1,parent2=parent2)
     # Wyświetlanie oryginalnych rodziców i zaznaczenie zmienionych komórek
-    print("Parent 1 with marked changes (red):")
-    print(marked_parents[0])
-    print("Parent 2 with marked changes (red):")
-    print(marked_parents[1])
+    print("Parent 1 with marked changes (cell value of -1):")
+    print(marked_parent1)
+    print("Parent 2 with marked changes (cell value of -1):")
+    print(marked_parent2)
 
     # Wyświetlanie potomków
     print("Offspring 1:")
-    print(offspring[0])
+    print(offspring1)
     print("Offspring 2:")
-    print(offspring[1])
+    print(offspring2)
+
+    print("===========================MUTATION=====================================")
+    mutate(offspring1,demand_volume)
+    print()
+    mutate(offspring2,demand_volume)
+    print()
+    print(demand_volume)
 
