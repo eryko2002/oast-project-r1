@@ -12,8 +12,9 @@ demand_volume=dict()
 population = list()
 
 num_chromosomes = 10  # Liczba chromosomów w populacji
-num_demands = 6       # Liczba żądań (kolumn)
-max_paths = 3         # Maksymalna liczba ścieżek (wierszy)
+num_demands = 6       # Liczba żądań d 
+max_paths = 3         # Maksymalna liczba ścieżek Pp
+
 
 def read_demand_volume():
     df = pd.read_csv(f'{demand_max_path_csv}')
