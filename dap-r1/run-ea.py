@@ -161,15 +161,20 @@ def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
     return flow_table
 
 
-def plot_convergence(convergence_data, optimal_z, title):
+def plot_convergence(lp_problem_choice,convergence_data, optimal_z, title):
+    ylabel = None
+    if lp_problem_choice == 1:
+        ylabel = "Best Z Value for DAP"
+    elif lp_problem_choice == 2:
+        ylabel = "Best Z Value for DDAP"
     plt.figure(figsize=(10, 6))
     for i, (conv, label) in enumerate(convergence_data):
         plt.plot(conv, label=label)
     plt.axhline(y=optimal_z, color='r', linestyle='--', label='Optimal Solution')
     plt.xlabel('Generation')
-    plt.ylabel('Best Z Value')
+    plt.ylabel('{}'.format(ylabel))
     plt.title(title)
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.grid(True)
     plt.show()
 
@@ -193,7 +198,7 @@ def run_ea(lp_problem_choice,population_size=N, max_generations=K, mutation_prob
     best_z = float('inf')
     best_solution = None
     convergence = []
-    
+    best_flow_table = None
     for generation_index in range(max_generations):
         # Obliczanie wartości funkcji celu dla wszystkich chromosomów z populacji 
         fitness_values = []
@@ -212,6 +217,7 @@ def run_ea(lp_problem_choice,population_size=N, max_generations=K, mutation_prob
             best_solution = population[current_best_idx]
         elif current_best_z <= optimal_z:
             break
+
         
         convergence.append(best_z)
 
@@ -244,11 +250,14 @@ def run_ea(lp_problem_choice,population_size=N, max_generations=K, mutation_prob
 #        ## funkcja sprawdzająca czy przewidywane rozwiązanie jest wystarczająco blisko optymalnego rozwiązania dostarczonego przez CPLEX
 #        #if should_terminate(best_z, optimal_z, TERMINATION_THRESHOLD):
         #    break
+        best_indices = np.argsort(fitness_values)[0]
+        best_flow_table = population[best_indices] 
     end_time = time.time()
     
     return {
         'best_solution': best_solution,
         'best_z': best_z,
+        'best_flow_table': best_flow_table,
         'optimal_z': optimal_z,
         'convergence': convergence,
         'time': end_time - start_time,
@@ -295,10 +304,12 @@ def main():
         })
         
         print(f"Best solution found: {result['best_z']} (optimal: {optimal_z})")
+        print(f"Best flow table found:\n {result['best_flow_table'].T}")
+        print(f"Demand_volume h_d: {demand_volume}")
         print(f"Computation time: {result['time']:.2f} seconds")
         print(f"Generations needed: {result['generations']}")
     
-    plot_convergence(convergence_data, optimal_z, "Convergence of Different EA Configurations")
+    plot_convergence(lp_problem_choice,convergence_data, optimal_z, "Convergence of Different EA Configurations")
     
     print("\nSummary of Results:")
     print("{:<30} {:<15} {:<15} {:<15} {:<15}".format(
