@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import time
 from read_config_net4 import *
 from generate_population import num_chromosomes
+import matplotlib.pyplot as plt
 
 # Domyślne parametry algorytmu EA
 
 N = num_chromosomes  # Rozmiar populacji
-K = 100  # Maksymalna liczba pokoleń
+K = 30  # Maksymalna liczba pokoleń
 MUTATION_PROBABILITY = 0.05 # prawdopodobieństwo mutacji
 MUTATION_TYPE = 'bit_flip'  # typ mutacji, do wyboru : ['bit_flip', 'random_reset']
 TERMINATION_THRESHOLD = 0.05  # procentowa różnica między przewidywanym rozwiązaniem a optymalnym rozwiązaniem cplex
@@ -94,7 +95,7 @@ def crossover(parent1, parent2):
     
     return offspring1,offspring2,parent1,parent2,marked_parent1,marked_parent2
 
-def mutate(flow_table, demand_volume, mutation_type='bit_flip', mutation_prob=0.4):
+def mutate(flow_table, demand_volume, mutation_type='bit_flip', mutation_prob = MUTATION_PROBABILITY):
     if np.random.rand() > mutation_prob:
         return flow_table  # bez mutacji
 
@@ -141,7 +142,8 @@ def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
                     #print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
                     #print(f'Iteration number: {iteration}')
                     #print(f"Current Delta: {delta}")
-                    #print("Current Flow_table \n{}".format(flow_table))
+                    #print("Current Flow_table \n{}".format(flow_table.T))
+                    #
                     #print()
             elif delta < 0 and flow_table[idx, col_idx]>0:
                 # Zwiększamy wartość w komórce, jeśli delta jest ujemna
@@ -152,7 +154,8 @@ def fix_column_sum(flow_table, row_idx, col_idx, demand_volume):
                     #print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
                     #print(f'Iteration number: {iteration}')
                     #print(f"Current Delta: {delta}")
-                    #print("Current Flow_table \n{}".format(flow_table))
+                    #print("Current Flow_table \n{}".format(flow_table.T))
+                    #print("h_d: {}".format(demand_volume))
                     #print()
 
     return flow_table
@@ -170,8 +173,7 @@ def plot_convergence(convergence_data, optimal_z, title):
     plt.grid(True)
     plt.show()
 
-
-def run_ea(population_size=N, max_generations=K, mutation_prob=MUTATION_PROBABILITY, 
+def run_ea(lp_problem_choice,population_size=N, max_generations=K, mutation_prob=MUTATION_PROBABILITY, 
            mutation_type=MUTATION_TYPE, selection_method='roulette'):
 
     start_time = time.time()
@@ -180,7 +182,10 @@ def run_ea(population_size=N, max_generations=K, mutation_prob=MUTATION_PROBABIL
     population = list(chromosomes_data.values())
     
     # Oblicz optymalną wartość funkcji celu dla sieci 4-węzłowej na bazie tablicy przepływu dostarczonej przez CPLEX
-    optimal_flow = load_flow_data()
+    if int(lp_problem_choice)==1:
+        optimal_flow = load_flow_data_dap()
+    elif int(lp_problem_choice)==2:
+        optimal_flow = load_flow_data_ddap()
     optimal_z, _ = calculate_objective_value(optimal_flow, demand_max_path, 
                                            demand_volume, demand_path_links, 
                                            link_capacity)
@@ -201,15 +206,15 @@ def run_ea(population_size=N, max_generations=K, mutation_prob=MUTATION_PROBABIL
         # Track best solution
         current_best_idx = np.argmin(fitness_values)
         current_best_z = fitness_values[current_best_idx]
-        if current_best_z < best_z:
+
+        if current_best_z < best_z and current_best_z > optimal_z:
             best_z = current_best_z
             best_solution = population[current_best_idx]
+        elif current_best_z <= optimal_z:
+            break
         
         convergence.append(best_z)
 
-        # funkcja sprawdzająca czy przewidywane rozwiązanie jest wystarczająco blisko optymalnego rozwiązania dostarczonego przez CPLEX
-        if should_terminate(best_z, optimal_z, TERMINATION_THRESHOLD):
-            break
         
         # Wywołąnie funkcji selekcji rodziców w zależności od podanego typu ['roulette','rank']
         if selection_method == 'roulette':
@@ -235,7 +240,10 @@ def run_ea(population_size=N, max_generations=K, mutation_prob=MUTATION_PROBABIL
         worst_indices = np.argsort(fitness_values)[-2:]
         population[worst_indices[0]] = offspring1
         population[worst_indices[1]] = offspring2
-    
+
+#        ## funkcja sprawdzająca czy przewidywane rozwiązanie jest wystarczająco blisko optymalnego rozwiązania dostarczonego przez CPLEX
+#        #if should_terminate(best_z, optimal_z, TERMINATION_THRESHOLD):
+        #    break
     end_time = time.time()
     
     return {
@@ -255,15 +263,26 @@ def main():
         {'mutation_type': 'bit_flip', 'selection_method': 'rank', 'label': 'Bit Flip + Rank'},
         {'mutation_type': 'random_reset', 'selection_method': 'rank', 'label': 'Random Reset + Rank'},
     ]
-    
-    optimal_flow = load_flow_data()
+
+    lp_problem_choice = int(input("Select LP Problem:\n1 = DAP\n2 = DDAP:\nYour choice:"))
+
+    # Load the appropriate matrix based on the user's choice
+    if lp_problem_choice == 1:
+        optimal_flow = load_flow_data_dap()
+        print("Loaded Flow table for optimal solution:\n", optimal_flow)
+    elif lp_problem_choice == 2:
+        optimal_flow = load_flow_data_ddap()
+        print("Loaded DDAP Flow table for optimal solution:\n", optimal_flow)
+    else:
+        print("Invalid choice. Please select either 1 for DAP or 2 for DDAP.")
+
     optimal_z, _ = calculate_objective_value(optimal_flow, demand_max_path, 
                                            demand_volume, demand_path_links, 
                                            link_capacity)
     
     for config in configs:
         print(f"\nRunning configuration: {config['label']}")
-        result = run_ea(mutation_type=config['mutation_type'], 
+        result = run_ea(lp_problem_choice=lp_problem_choice,mutation_type=config['mutation_type'], 
                        selection_method=config['selection_method'])
         
         convergence_data.append((result['convergence'], config['label']))
@@ -279,7 +298,7 @@ def main():
         print(f"Computation time: {result['time']:.2f} seconds")
         print(f"Generations needed: {result['generations']}")
     
-    #plot_convergence(convergence_data, optimal_z, "Convergence of Different EA Configurations")
+    plot_convergence(convergence_data, optimal_z, "Convergence of Different EA Configurations")
     
     print("\nSummary of Results:")
     print("{:<30} {:<15} {:<15} {:<15} {:<15}".format(
@@ -287,6 +306,7 @@ def main():
     for sol in best_solutions:
         percent_optimal = (sol['z_value'] / optimal_z) * 100
         print("{:<30} {:<15.2f} {:<15.2f}% {:<15.2f} {:<15}".format(sol['config'], sol['z_value'], optimal_z, percent_optimal, sol['time'], sol['generations']))
+
 
 if __name__ == "__main__":
     main()

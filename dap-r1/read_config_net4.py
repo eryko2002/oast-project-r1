@@ -71,9 +71,9 @@ def load_demand_max_path_volume(file_path):
     demand_volume = dict(zip(df_demand['Demand'], df_demand['Volume']))
     return demand_max_path, demand_volume
 
-def load_flow_data():
+def load_flow_data_dap():
     """
-    Funkcja zwraca przykładową tabelę przepływów obliczoną przez CPLEX.
+    Funkcja zwraca przykładową tabelę przepływów obliczoną przez CPLEX dla dap dla sieci 4 węzłowej
     
     :return: Macierz przepływów
     """
@@ -86,8 +86,22 @@ def load_flow_data():
         [17, 0, 0]
     ])
 
+def load_flow_data_ddap():
+    """
+    Funkcja zwraca przykładową tabelę przepływów obliczoną przez CPLEX dla ddap dla sieci 4 węzłowej
+    
+    :return: Macierz przepływów
+    """
+    return np.array([
+        [23, 0, 0],
+        [24, 0, 0],
+        [35, 0, 0],
+        [12, 0, 0],
+        [23, 0, 0],
+        [0, 17, 0]
+    ])
 chromosomes_data = load_chromosomes_from_json(chromosomes_matrix_path)
 demand_path_links = load_demand_path_links(demand_path_links_csv)
 link_capacity = load_link_capacity(link_capacity_csv)
 demand_max_path, demand_volume = load_demand_max_path_volume(demand_max_path_csv)
-demandPath_flow = load_flow_data()
+#demandPath_flow = load_flow_data()

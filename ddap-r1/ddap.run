@@ -7,8 +7,8 @@ model "./ddap.mod";
 print( "------------------ reading data ...");
 #data "./ddap-net3.dat";
 #data "./ddap-net3a.dat";
-data "./dap-net4.dat"
-#data "./ddap-net4.dat";
+#data "./dap-net4.dat"
+data "./ddap-net4.dat";
 #data "./ddap-net12.dat";
 
 
